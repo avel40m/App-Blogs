@@ -98,4 +98,10 @@ app.get('/post', async (req, res) => {
     res.json(posts);
 });
 
+app.get('/post/:id', async (req, res) => {
+    const {id} = req.params;
+    const postDocs = await PostModel.findById(id).populate('author',['username']);
+    res.json(postDocs);
+});
+
 app.listen(4000);
