@@ -1,18 +1,17 @@
-export default function Post(){
+import { format } from 'date-fns';
+export default function Post({title,summary,cover,content,createdAt,author}){
     return (
     <div className="post">
         <div className="image">
-          <img src="https://img.interempresas.net/fotos/2791134.jpeg" alt="" />
+          <img src={`http://localhost:4000/${cover}`} alt="" />
         </div>
         <div className="texts">
-          <h2>Full-house battery backup comming latter this year</h2>
+          <h2>{title}</h2>
           <p className="info">
-            <a href="" className="author">Avel Mendez</a>
-            <span className="timer">2023-01-06 16:45</span>
+            <a href="" className="author">{author.username}</a>
+            <span className="timer">{format(new Date(createdAt),'MMM d, yyyy HH:mm')}</span>
           </p>
-          <p className="summary">
-            Lorem ipsum dolor sit amet consectetur, adipisicing elit. Soluta{" "}
-          </p>
+          <p className="summary">{summary}</p>
         </div>
       </div>     
     )

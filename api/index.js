@@ -19,7 +19,7 @@ const app = express();
 app.use(cors({credentials: true,origin: 'http://localhost:3000'}));
 app.use(express.json());
 app.use(cookieParser());
-
+app.use('/uploads',express.static(__dirname + '/uploads'));
 try {
     mongoose.connect('mongodb://127.0.0.1:27017/myappblog')
         .then(() => console.log)
@@ -74,16 +74,28 @@ app.post('/post',uploadMiddleware.single('file'), async (req, res) => {
     const newPath = path+'.'+ext;
     fs.renameSync(path,newPath);
 
-    const {title,summary,content} = req.body;
+    const {token} = req.cookies;
+
+    jwt.verify(token,secret,{},async (err,info) => {
+        if(err) throw err;
+
+        const {title,summary,content} = req.body;
+        const Post = await PostModel.create({
+            title,
+            summary,
+            content,
+            cover:newPath,
+            author:info.id
+        });
     
-    const Post = await PostModel.create({
-        title,
-        summary,
-        content,
-        cover:newPath
+        res.json(Post);
     });
 
-    res.json(Post);
-})
+});
+
+app.get('/post', async (req, res) => {
+    const posts = await PostModel.find().populate('author',['username']).sort({createdAt: -1}).limit(20);
+    res.json(posts);
+});
 
 app.listen(4000);
