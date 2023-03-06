@@ -7,7 +7,6 @@ export default function IndexPages(){
         fetch('http://localhost:4000/post',{method: 'GET'})
             .then(response => response.json()
                 .then(post => {
-                    console.log(post);
                     setPosts(post)})
             );
     },[]);

@@ -93,6 +93,36 @@ app.post('/post',uploadMiddleware.single('file'), async (req, res) => {
 
 });
 
+app.put('/post',uploadMiddleware.single('file'), async (req, res) => {
+    let newPath = null;
+    if(req.file){
+        const {originalname,path} = req.file;
+        const parts = originalname.split('.');
+        const ext = parts[parts.length - 1 ];
+        newPath = path+'.'+ext;
+        fs.renameSync(path,newPath);
+    }
+
+    const {token} = req.cookies;
+
+    jwt.verify(token,secret,{},async (err,info) => {
+        if(err) throw err;
+        const {id,title,summary,content} = req.body;
+        const PostDocs = await PostModel.findById(id);
+        const isAuthor = JSON.stringify(PostDocs.author) === JSON.stringify(info.id);
+        if (!isAuthor) {
+            res.status(404).send('you are not the author')
+        }
+        await PostDocs.updateOne({
+            title,
+            summary,
+            content,
+            cover: newPath ? newPath : PostDocs.cover
+        });
+        res.json(PostDocs);
+    });
+})
+
 app.get('/post', async (req, res) => {
     const posts = await PostModel.find().populate('author',['username']).sort({createdAt: -1}).limit(20);
     res.json(posts);
